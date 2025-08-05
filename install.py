@@ -61,6 +61,6 @@ class CronitorInstaller(ExtensionInstaller):
 
         cronitor_dict = configobj.ConfigObj(CRONITOR_CONFIG)
         install_dict['config'] = cronitor_dict
-        install_dict['prep_services'] = 'user.cronitor.Cronitor'
+        # install_dict['prep_services'] = 'user.cronitor.Cronitor'
 
         super().__init__(install_dict)
