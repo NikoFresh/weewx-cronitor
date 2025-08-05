@@ -1,44 +1,53 @@
 # weewx-healthchecks
 
-A WeeWX extension that uses [Healthchecks.io](https://healthchecks.io) to monitor WeeWX.
+A WeeWX extension that uses [Cronitor.io](https://cronitor.io) to monitor WeeWX.
 
-At WeeWX startup, a [start signal](https://healthchecks.io/docs/http_api/#start-uuid) is sent to Healthchecks.io.
+Every WeeWX report cycle, a success signal is sent to Cronitor.io.
 
-When WeeWX shutsdown, a [failure signal](https://healthchecks.io/docs/http_api/#fail-uuid) is sent to Healthchecks.io.
+The method(s) of notification are also [selected](https://cronitor.io/docs/heartbeat-monitoring#alert-configuration) at [Cronitor.io](https://cronitor.io).
 
-Every WeeWX report cycle, a [success signal](https://healthchecks.io/docs/http_api/#success-uuid) is sent to Healthchecks.io.
+The [getting started](https://cronitor.io/docs) is a good introduction.
 
-How to handle missing or late `success signals` can be [configured](https://healthchecks.io/docs/configuring_checks/) at [Healthchecks.io](https://healthchecks.io).
+You can add a [status page](https://cronitor.io/docs/status-pages) to display the current state of the system to your visitators.
 
-The method(s) of notification are also [selected](https://healthchecks.io/docs/configuring_notifications/) at [Healthchecks.io](https://healthchecks.io).
+## Installation
+Run `weectl extension install https://github.com/NikoFresh/weewx-cronitor/archive/master.zip`
 
-The [getting started](https://healthchecks.io/docs/) is a good introduction.
+## Configuration
 
-## Installation and configuring `weewx-healthchecks`
-
-After installing `weewx-healthchecks`, edit `weewx.conf`
-In the
+After installing `weewx-cronitor`, edit `weewx.conf`:
 
 ```text
 [StdReport]
-    [Healthchecks]
-    # Turn the extension on and off.
-    # Default is: true
-    # enable = true
-    
-    # The host to 'ping'
-    # Default is hc-ping.com
-    # host = hc-ping.com
-    
-    # The http request timeout
-    # The default is 10
-    # timeout = 10
+    [[Cronitor]]
+        # Turn the service on and off.
+        enable = false
         
-    # The HealthChecks uuid
-    uuid = REPLACE_ME
+        skin = cronitor
+        
+        # The host to 'ping'
+        # Default is cronitor.link/p
+        # host = cronitor.link/p 
+
+        # The name for the tracker
+        # Default is Weewx
+        # device_name = Weewx
+        
+        # The http request timeout
+        # The default is 10
+        # timeout = 10
+        
+        # The Cronitor api_key
+        api_key = REPLACE_ME
 ```
 
 1. Set `enable = true`
-2. Set `uuid` to the `uuid` that is associated with the `check` created at Healthchecks.io.
+2. Set `api_key` to the `api_key` that is associated with the `Heartbeats` of your account at Cronitor.io.
 
-Restart WeeWx
+Restart WeeWX
+
+## Example
+You can check my [status page](https://meteocentrocadore.cronitorstatus.com/) to see how the data is displayed.
+
+## Credits
+Thanks to bellrichm for the original weewx-healthchecks
