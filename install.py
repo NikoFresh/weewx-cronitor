@@ -13,15 +13,15 @@ from weecfg.extension import ExtensionInstaller
 
 VERSION = '0.2.0'
 
-HEALTHCHECKS_CONFIG = """
+CRONITOR_CONFIG = """
 [StdReport]
-    [[Healthchecks]]
+    [[Cronitor]]
         # Turn the service on and off.
         # Default is: true
         # Only used by the service.
         enable = false
         
-        skin = healthchecks
+        skin = cronitor
         
         # The host to 'ping'
         # Default is cronitor.link/p
@@ -35,32 +35,32 @@ HEALTHCHECKS_CONFIG = """
         # The default is 10
         # timeout = 10
         
-        # The HealthChecks api_key
+        # The Cronitor api_key
         api_key = REPLACE_ME
 """
 
 
 def loader():
     """ Load and return the extension installer. """
-    return HealthchecksInstaller()
+    return CronitorInstaller()
 
-class HealthchecksInstaller(ExtensionInstaller):
+class CronitorInstaller(ExtensionInstaller):
     """ The extension installer. """
     def __init__(self):
         install_dict = {
             'version': VERSION,
-            'name': 'Healthchecks',
-            'description': 'Monitor WeeWX using Healthchecks.io.',
+            'name': 'Cronitor',
+            'description': 'Monitor WeeWX using Cronitor.io',
             'author': "Rich Bell",
             'author_email': "bellrichm@gmail.com",
             'files': [
-                ('bin/user', ['bin/user/healthchecks.py']),
-                ('skins/healthchecks',['skins/healthchecks/skin.conf']),             
+                ('bin/user', ['bin/user/cronitor.py']),
+                ('skins/cronitor',['skins/cronitor/skin.conf']),             
             ]
         }
 
-        healthchecks_dict = configobj.ConfigObj(HEALTHCHECKS_CONFIG)
-        install_dict['config'] = healthchecks_dict
-        install_dict['prep_services'] = 'user.healthchecks.Healthchecks'
+        cronitor_dict = configobj.ConfigObj(CRONITOR_CONFIG)
+        install_dict['config'] = cronitor_dict
+        install_dict['prep_services'] = 'user.cronitor.Cronitor'
 
         super().__init__(install_dict)

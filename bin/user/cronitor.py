@@ -4,25 +4,25 @@
 #    See the file LICENSE.txt for your full rights.
 #
 """
-'ping' healthchecks on every archive record.
-See, https://healthchecks.io/docs/
+'ping' cronitor on every archive record.
+See, https://cronitor.io/docs
 
 Configuration:
-[HealthChecks]
-   # Whether the service is enabled or not.
-   # Valid values: True or False
-   # Default is True.
-   # enable = True
+[Cronitor]
+    # Whether the service is enabled or not.
+    # Valid values: True or False
+    # Default is True.
+    # enable = True
 
     # The host to 'ping'
-    # Default is hc-ping.com
+    # Default is cronitor.link/p
     # host = cronitor.link/p
 
     # The name for the tracker
     # Default is Weewx
     # device_name = Weewx
 
-    # The HealthChecks api_key
+    # The Cronitor api_key
     api_key = REPLACE_ME
 
     # The http request timeout
@@ -51,7 +51,7 @@ def setup_logging(logging_level, config_dict):
     if logging_level:
         weewx.debug = logging_level
 
-    weeutil.logger.setup('wee_HealthChecks', config_dict)
+    weeutil.logger.setup('wee_Cronitor', config_dict)
 
 def logdbg(msg):
     """ Log debug level. """
@@ -66,7 +66,7 @@ def logerr(msg):
     log.error(msg)
 
 def send_ping(host, api_key, device_name, timeout, ping_type=None):
-    """Send the HealthChecks 'ping'."""
+    """Send the Cronitor 'ping'."""
     if ping_type:
         url = f"https://{host}/{api_key}/{device_name}?{ping_type}"
     else:
@@ -77,13 +77,13 @@ def send_ping(host, api_key, device_name, timeout, ping_type=None):
     except socket.error as exception:
         logerr(f"Ping failed: {exception}")
 
-class HealthChecksService(StdService):
-    """ A service to ping a healthchecks server.. """
+class CronitorService(StdService):
+    """ A service to ping a cronitor server.. """
     def __init__(self, engine, config_dict):
-        super(HealthChecksService, self).__init__(engine, config_dict)
+        super(CronitorService, self).__init__(engine, config_dict)
 
         # service_dict = config_dict.get('HealthChecks', {})
-        skin_dict = self.config_dict.get('StdReport', {}).get('HealthChecks', {})
+        skin_dict = self.config_dict.get('StdReport', {}).get('Cronitor', {})
 
         self.enable = to_bool(skin_dict.get('enable', True))
         if not self.enable:
@@ -129,8 +129,8 @@ class HealthChecksService(StdService):
 
             self._thread = None
 
-class HealthChecksServiceThread(threading.Thread):
-    """A service to send 'pings' to a HealthChecks server. """
+class CronitorServiceThread(threading.Thread):
+    """A service to send 'pings' to a Cronitor server. """
     def __init__(self, host, api_key, device_name, timeout):
         threading.Thread.__init__(self)
 
@@ -153,10 +153,10 @@ class HealthChecksServiceThread(threading.Thread):
 
         loginf("exited loop")
 
-class HealthChecksGenerator(ReportGenerator):
-    """Class for managing the healthchecks generator."""
+class CronitorGenerator(ReportGenerator):
+    """Class for managing the cronitor generator."""
     def __init__(self, config_dict, skin_dict, *args, **kwargs):
-        """Initialize an instance of HealthChecksGenerator"""
+        """Initialize an instance of CronitorGenerator"""
         weewx.reportengine.ReportGenerator.__init__(self, config_dict, skin_dict, *args, **kwargs)
 
         self.host = skin_dict.get('host', 'cronitor.link/p')
