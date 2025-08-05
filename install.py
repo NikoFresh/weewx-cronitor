@@ -24,15 +24,19 @@ HEALTHCHECKS_CONFIG = """
         skin = healthchecks
         
         # The host to 'ping'
-        # Default is hc-ping.com
-        # host = hc-ping.com
+        # Default is cronitor.link/p
+        # host = cronitor.link/p 
+
+        # The name for the tracker
+        # Default is Weewx
+        # device_name = Weewx
         
         # The http request timeout
         # The default is 10
         # timeout = 10
         
-        # The HealthChecks uuid
-        uuid = REPLACE_ME
+        # The HealthChecks api_key
+        api_key = REPLACE_ME
 """
 
 

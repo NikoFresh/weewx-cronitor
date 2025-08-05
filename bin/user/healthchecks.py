@@ -16,10 +16,14 @@ Configuration:
 
     # The host to 'ping'
     # Default is hc-ping.com
-    # host = hc-ping.com
+    # host = cronitor.link/p
 
-    # The HealthChecks uuid
-    uuid = REPLACE_ME
+    # The name for the tracker
+    # Default is Weewx
+    # device_name = Weewx
+
+    # The HealthChecks api_key
+    api_key = REPLACE_ME
 
     # The http request timeout
     # The default is 10
@@ -61,12 +65,12 @@ def logerr(msg):
     """ Log error level. """
     log.error(msg)
 
-def send_ping(host, uuid, timeout, ping_type=None):
+def send_ping(host, api_key, device_name, timeout, ping_type=None):
     """Send the HealthChecks 'ping'."""
     if ping_type:
-        url = f"https://{host}/{uuid}/{ping_type}"
+        url = f"https://{host}/{api_key}/{device_name}?{ping_type}"
     else:
-        url = f"https://{host}/{uuid}"
+        url = f"https://{host}/{api_key}/{device_name}"
 
     try:
         urlopen(url, timeout=timeout)
@@ -86,19 +90,22 @@ class HealthChecksService(StdService):
             loginf("Not enabled, exiting.")
             return
 
-        self.host = skin_dict.get('host', 'hc-ping.com')
+        self.host = skin_dict.get('host', 'cronitor.link/p')
         self.timeout = to_int(skin_dict.get('timeout', 10))
-        self.uuid = skin_dict.get('uuid')
-        if not self.uuid:
-            raise ValueError("uuid option is required.")
+        self.device_name = skin_dict.get('device_name', 'Weewx')
+        if not self.device_name:
+            raise ValueError("device_name option is required.")
+        self.api_key = skin_dict.get('api_key')
+        if not self.api_key:
+            raise ValueError("api_key option is required.")
 
         self._thread = None
 
-        send_ping(self.host, self.uuid, self.timeout, "start")
+        send_ping(self.host, self.api_key, self.device_name, self.timeout, "start")
 
         # possible option to run as a service only
         # self.bind(weewx.NEW_ARCHIVE_RECORD, self.new_archive_record)
-        # self._thread = HealthChecksServiceThread(self.host, self.uuid, self.timeout)
+        # self._thread = HealthChecksServiceThread(self.host, self.api_key, self.timeout)
         # self._thread.start()
 
     def new_archive_record(self, event): # Need to match signature pylint: disable=unused-argument
@@ -109,7 +116,7 @@ class HealthChecksService(StdService):
         """Run when an engine shutdown is requested."""
         loginf("SHUTDOWN - initiated")
 
-        send_ping(self.host, self.uuid, self.timeout, "fail")
+        send_ping(self.host, self.api_key, self.device_name, self.timeout, "fail")
         loginf("fail ping sent")
 
         if self._thread:
@@ -124,13 +131,14 @@ class HealthChecksService(StdService):
 
 class HealthChecksServiceThread(threading.Thread):
     """A service to send 'pings' to a HealthChecks server. """
-    def __init__(self, host, uuid, timeout):
+    def __init__(self, host, api_key, device_name, timeout):
         threading.Thread.__init__(self)
 
         self.running = False
 
         self.host = host
-        self.uuid = uuid
+        self.device_name = device_name
+        self.api_key = api_key
         self.timeout = timeout
 
         self.threading_event = threading.Event()
@@ -140,7 +148,7 @@ class HealthChecksServiceThread(threading.Thread):
 
         while self.running:
             self.threading_event.wait()
-            send_ping(self.host, self.uuid, self.timeout)
+            send_ping(self.host, self.api_key, self.device_name, self.timeout)
             self.threading_event.clear()
 
         loginf("exited loop")
@@ -151,14 +159,17 @@ class HealthChecksGenerator(ReportGenerator):
         """Initialize an instance of HealthChecksGenerator"""
         weewx.reportengine.ReportGenerator.__init__(self, config_dict, skin_dict, *args, **kwargs)
 
-        self.host = skin_dict.get('host', 'hc-ping.com')
+        self.host = skin_dict.get('host', 'cronitor.link/p')
         self.timeout = to_int(skin_dict.get('timeout', 10))
-        self.uuid = skin_dict.get('uuid')
-        if not self.uuid:
-            raise ValueError("uuid option is required.")
+        self.device_name = skin_dict.get('device_name', 'Weewx')
+        if not self.device_name:
+            raise ValueError("device_name option is required.")
+        self.api_key = skin_dict.get('api_key')
+        if not self.api_key:
+            raise ValueError("api_key option is required.")
 
     def run(self):
-        send_ping(self.host, self.uuid, self.timeout)
+        send_ping(self.host, self.api_key, self.device_name, self.timeout)
 
 if __name__ == "__main__":
     pass
