@@ -68,7 +68,7 @@ def logerr(msg):
 def send_ping(host, api_key, device_name, timeout, ping_type=None):
     """Send the Cronitor 'ping'."""
     if ping_type:
-        url = f"https://{host}/{api_key}/{device_name}?{ping_type}"
+        url = f"https://{host}/{api_key}/{device_name}?WeewxStatus={ping_type}"
     else:
         url = f"https://{host}/{api_key}/{device_name}"
 
